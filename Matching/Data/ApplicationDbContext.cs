@@ -64,6 +64,11 @@ namespace Matching.Data
                 .WithMany()
                 .HasForeignKey(x=>x.CreatorId)
                 .OnDelete(DeleteBehavior.NoAction);
+            builder.Entity<RoomImages>()
+                .HasOne(x => x.Room)
+                .WithMany()
+                .HasForeignKey(x => x.RoomId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
         public DbSet<User> Users { get; set; }
@@ -73,5 +78,7 @@ namespace Matching.Data
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<UserTicket> UserTickets {  get; set; }
         public DbSet<Request> Requests { get; set; }
+        public DbSet<RoomImages> RoomImages { get; set; }
+        public DbSet<Blog> Blogs {  get; set; }
     }
 }

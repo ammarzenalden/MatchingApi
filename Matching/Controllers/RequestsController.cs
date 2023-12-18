@@ -1,4 +1,5 @@
-﻿using Matching.Data;
+﻿using Matching.Configure;
+using Matching.Data;
 using Matching.Dto;
 using Matching.Model;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +27,15 @@ namespace Matching.Controllers
         [HttpPost("SendRequest/{id}")]
         public async Task<ActionResult> SendRequset(int id)
         {
+            var receiver = await _context.Users.FindAsync(id);
+            if(receiver == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "there is no user by this Id"
+                });
+            }
             Request request = new()
             {
                 DateTime = DateTime.UtcNow,
@@ -38,6 +48,15 @@ namespace Matching.Controllers
             userTicket!.TicketStatus = "wating";
             _context.UserTickets.Update(userTicket);
             await _context.SaveChangesAsync();
+            Email email = new();
+            try
+            {
+                email.SendResetEmail(receiver.Email!, "Req", "you have new Request");
+            }
+            catch
+            {
+
+            }
             return Ok(new
             {
                 success = true,
@@ -86,23 +105,39 @@ namespace Matching.Controllers
             }
             var ticket = await _context.UserTickets
                 .FirstOrDefaultAsync(x => x.SenderId == request.SenderId && x.ReceiverId == GetUserId());
-            
+            Email email = new();
+            var sender = await _context.Users.FindAsync(request.SenderId);
             if (answerDto.Answer == true)
             {
                 ticket!.TicketStatus = "Accepted";
                 var allrequets = await _context.UserTickets.Where(x => x.SenderId == request.SenderId && x.ReceiverId != GetUserId()).ToListAsync();
-                try
+                if(allrequets.Count != 0)
                 {
-                    foreach(var req in allrequets)
+                    foreach (var req in allrequets)
                     {
                         _context.UserTickets.Remove(req);
                     }
                 }
-                catch { }
+                try
+                {
+                    email.SendResetEmail(sender!.Email!, "Req", "Accept you");
+                }
+                catch
+                {
+
+                }
             }
             else if(answerDto.Answer == false)
             {
                 ticket!.TicketStatus = "Rejected";
+                try
+                {
+                    email.SendResetEmail(sender!.Email!, "Req", "Rejected you");
+                }
+                catch
+                {
+
+                }
             }
             _context.UserTickets.Update(ticket!);
             _context.Requests.Remove(request);
