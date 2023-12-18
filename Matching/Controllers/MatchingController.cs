@@ -141,9 +141,9 @@ namespace Matching.Controllers
                             
                             PersonalPreferences pr = await _context.PersonalPreferences.FirstOrDefaultAsync(x => x.UserId == allpers.UserId);
                             PotentialPartnerPreferences po = await _context.PotentialPartnerPreferences.FirstOrDefaultAsync(x => x.UserId == allpers.UserId);
-                            User theUser = new()
+                            UserResultDto theUser = new()
                             {
-                                Id = user.Id,
+                                Id = user!.Id,
                                 Email = user!.Email,
                                 ImageUrl = user.ImageUrl,
                                 Name = user.Name,
@@ -167,11 +167,11 @@ namespace Matching.Controllers
                 
                 foreach(var ss in sortedPartners)
                 {
-                    var users = await _context.Users.FirstOrDefaultAsync(x => x.Email == ss.User!.Email);
+                    
                     UserTicket userTicket = new()
                     {
                         SenderId = userId,
-                        ReceiverId = users!.Id,
+                        ReceiverId = ss.User!.Id,
                         TicketId = ticket!.Id,
                         TicketStatus = "pending"
                     };
@@ -262,8 +262,9 @@ namespace Matching.Controllers
                 });
             }
             var similrTicekt = await _context.Tickets
-                .FirstOrDefaultAsync(x => x.BookingDate == ticket.BookingDate && x.RoomId == ticket.RoomId);
-            if(similrTicekt == null)
+                .OrderBy(x => Guid.NewGuid())
+                .FirstOrDefaultAsync(x => x.BookingDate == ticket.BookingDate && x.RoomId == ticket.RoomId && x.CreatorId != GetUserId());
+            if (similrTicekt == null)
             {
                 return Ok(new
                 {
@@ -279,10 +280,20 @@ namespace Matching.Controllers
                 TicketId = ticket.Id,
                 TicketStatus = "pending"
             };
+            _context.UserTickets.Add(userTicket);
+            _context.SaveChanges();
+            UserResultDto theUser = new()
+            {
+                Id = similrUser.Id,
+                Email = similrUser!.Email,
+                ImageUrl = similrUser.ImageUrl,
+                Name = similrUser.Name,
+                PhoneNumber = similrUser.PhoneNumber
+            };
             return Ok(new
             {
                 success = true,
-                data = similrUser
+                data = theUser
             });
             
         }

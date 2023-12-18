@@ -15,6 +15,8 @@ namespace Matching.Model
         [JsonIgnore]
         [ForeignKey("CreatorId")]
         public User? Creator { get; set; }
+        public string? Lat {  get; set; }
+        public string? Long { get; set; }
 
     }
 }

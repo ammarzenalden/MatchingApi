@@ -36,6 +36,10 @@ namespace Matching.Controllers
             foreach (PropertyInfo property in roomDto.GetType().GetProperties())
             {
                 object value = property.GetValue(roomDto)!;
+                if(property.Name == "Long" || property.Name == "Lat")
+                {
+                    continue;
+                }
                 if (value == null)
                 {
                     hasNull = true;
@@ -54,7 +58,9 @@ namespace Matching.Controllers
             {
                 Description = roomDto.Description,
                 CreatorId = GetUserId(),
-                RoomName = roomDto.RoomName
+                RoomName = roomDto.RoomName,
+                Lat = roomDto.Lat,
+                Long = roomDto.Long
             };
             if (image is null)
             {
@@ -103,6 +109,8 @@ namespace Matching.Controllers
             string wwwRootPath = _webHostEnvironment.WebRootPath;
             oldRoom.Description = roomDto.Description;
             oldRoom.RoomName = roomDto.RoomName;
+            oldRoom.Lat = roomDto.Lat;
+            oldRoom.Long = roomDto.Long;
             if (oldRoom.ImageUrl is not null)
             {
                 var oldImagePath = Path.Combine(wwwRootPath, oldRoom.ImageUrl.TrimStart('\\'));

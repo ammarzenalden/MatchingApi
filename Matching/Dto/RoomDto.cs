@@ -4,5 +4,7 @@
     {
         public string? RoomName { get; set; }
         public string? Description { get; set; }
+        public string? Lat { get; set; }
+        public string? Long { get; set; }
     }
 }

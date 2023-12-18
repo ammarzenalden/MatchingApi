@@ -12,7 +12,7 @@ namespace Matching.Model
         [JsonIgnore]
         [ForeignKey("CreatorId")]
         public User? Creator {  get; set; }
-        public DateTime BookingDate { get; set; }
+        public string? BookingDate { get; set; }
         public int? RoomId { get; set; }
         [JsonIgnore]
         [ForeignKey("RoomId")]

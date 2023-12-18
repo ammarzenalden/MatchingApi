@@ -34,10 +34,9 @@ namespace Matching.Controllers
                     message = "you already have Ticket"
                 });
             }
-            DateTime.TryParseExact(ticketDto.BookingDate, "yyyy-MM-dd hhhtt", null, System.Globalization.DateTimeStyles.None, out DateTime dateTime);
             var RoomDate = await _context.Tickets
-                .Where(x => x.RoomId == ticketDto.RoomId && x.BookingDate == dateTime).ToListAsync();
-            if(RoomDate!.Any())
+                .Where(x => x.RoomId == ticketDto.RoomId && x.BookingDate == ticketDto.BookingDate).ToListAsync();
+            if(RoomDate.Count != 0)
             {
                 return Conflict(new
                 {
@@ -50,7 +49,7 @@ namespace Matching.Controllers
             Ticket ticket = new()
             {
                 Type = ticketDto.Type,
-                BookingDate = dateTime,
+                BookingDate = ticketDto.BookingDate,
                 CreatorId = GetUserId(),
                 RoomId = ticketDto.RoomId
             };
@@ -74,19 +73,19 @@ namespace Matching.Controllers
                     message = "you dont have ticket"
                 });
             }
-            DateTime.TryParseExact(ticketDto.BookingDate, "yyyy-MM-dd hhhtt", null, System.Globalization.DateTimeStyles.None, out DateTime dateTime);
+            //DateTime.TryParseExact(ticketDto.BookingDate, "yyyy-MM-dd hhhtt", null, System.Globalization.DateTimeStyles.None, out DateTime dateTime);
 
             var RoomDate = await _context.Tickets
-               .Where(x => x.RoomId == ticketDto.RoomId && x.BookingDate == dateTime).ToListAsync();
-            if (RoomDate != null)
+               .Where(x => x.RoomId == ticketDto.RoomId && x.BookingDate == ticketDto.BookingDate).ToListAsync();
+            if (RoomDate.Count != 0)
             {
                 return Conflict(new
                 {
                     success = false,
-                    message = "the Room is booked on this date chose another date"
+                    message = "the Room is booked on this date chose another date",
                 });
             }
-            oldTicket.BookingDate = dateTime;
+            oldTicket.BookingDate = ticketDto.BookingDate;
             oldTicket.RoomId = ticketDto.RoomId;
             oldTicket.Type = ticketDto.Type;
             _context.Tickets.Update(oldTicket);
