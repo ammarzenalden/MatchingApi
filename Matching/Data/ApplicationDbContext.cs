@@ -60,11 +60,11 @@ namespace Matching.Data
                 .WithMany()
                 .HasForeignKey(x => x.ReceiverId)
                 .OnDelete(DeleteBehavior.NoAction);
-            builder.Entity<Room>()
-                .HasOne(x=>x.Creator)
-                .WithMany()
-                .HasForeignKey(x=>x.CreatorId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder.Entity<Room>()
+            //    .HasOne(x=>x.Creator)
+            //    .WithMany()
+            //    .HasForeignKey(x=>x.CreatorId)
+            //    .OnDelete(DeleteBehavior.NoAction);
             builder.Entity<RoomImages>()
                 .HasOne(x => x.Room)
                 .WithMany()

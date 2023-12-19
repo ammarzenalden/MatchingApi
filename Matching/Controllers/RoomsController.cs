@@ -63,6 +63,7 @@ namespace Matching.Controllers
             
         }
         [HttpPost("CreateRoom")]
+        [AllowAnonymous]
         public async Task<ActionResult> CreateRoom([FromForm]RoomDto roomDto, List<IFormFile>? images)
         {
             Boolean hasNull = false;
@@ -91,10 +92,11 @@ namespace Matching.Controllers
             Room room = new()
             {
                 Description = roomDto.Description,
-                CreatorId = GetUserId(),
+                //CreatorId = GetUserId(),
                 RoomName = roomDto.RoomName,
                 Lat = roomDto.Lat,
-                Long = roomDto.Long
+                Long = roomDto.Long,
+                Location = roomDto.Location
             };
             _context.Rooms.Add(room);
             _context.SaveChanges();
@@ -125,106 +127,107 @@ namespace Matching.Controllers
                 images = imgs
             });
         }
-        [HttpPut("UpdateRoom/{id}")]
-        public async Task<ActionResult> UpdateRoom([FromForm]RoomDto roomDto, List<IFormFile>? images,int id)
-        {
-            var oldRoom = await _context.Rooms.FindAsync(id);
+        //[HttpPut("UpdateRoom/{id}")]
+        //public async Task<ActionResult> UpdateRoom([FromForm]RoomDto roomDto, List<IFormFile>? images,int id)
+        //{
+        //    var oldRoom = await _context.Rooms.FindAsync(id);
 
-            if(oldRoom == null)
-            {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "there is no Room By this Id"
-                });
-            }
-            if(oldRoom.CreatorId != GetUserId())
-            {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "you are not the owner"
-                });
-            }
-            string wwwRootPath = _webHostEnvironment.WebRootPath;
-            oldRoom.Description = roomDto.Description;
-            oldRoom.RoomName = roomDto.RoomName;
-            oldRoom.Lat = roomDto.Lat;
-            oldRoom.Long = roomDto.Long;
-            var imageUrl = await _context.RoomImages.Where(x => x.RoomId == oldRoom.Id).ToListAsync();
-            if (imageUrl.Count != 0)
-            {
-                foreach(var img in imageUrl)
-                {
-                    var oldImagePath = Path.Combine(wwwRootPath, img.image!.TrimStart('\\'));
+        //    if(oldRoom == null)
+        //    {
+        //        return NotFound(new
+        //        {
+        //            success = false,
+        //            message = "there is no Room By this Id"
+        //        });
+        //    }
+        //    if(oldRoom.CreatorId != GetUserId())
+        //    {
+        //        return Unauthorized(new
+        //        {
+        //            success = false,
+        //            message = "you are not the owner"
+        //        });
+        //    }
+        //    string wwwRootPath = _webHostEnvironment.WebRootPath;
+        //    oldRoom.Description = roomDto.Description;
+        //    oldRoom.RoomName = roomDto.RoomName;
+        //    oldRoom.Lat = roomDto.Lat;
+        //    oldRoom.Long = roomDto.Long;
+        //    oldRoom.Location = roomDto.Location;
+        //    var imageUrl = await _context.RoomImages.Where(x => x.RoomId == oldRoom.Id).ToListAsync();
+        //    if (imageUrl.Count != 0)
+        //    {
+        //        foreach(var img in imageUrl)
+        //        {
+        //            var oldImagePath = Path.Combine(wwwRootPath, img.image!.TrimStart('\\'));
                     
-                    if (System.IO.File.Exists(oldImagePath))
-                    {
-                        System.IO.File.Delete(oldImagePath);
-                    }
-                }
-            }if(images is not null)
-            {
-                foreach (var image in images)
-                {
+        //            if (System.IO.File.Exists(oldImagePath))
+        //            {
+        //                System.IO.File.Delete(oldImagePath);
+        //            }
+        //        }
+        //    }if(images is not null)
+        //    {
+        //        foreach (var image in images)
+        //        {
 
-                    string imageName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                    string imagePath = Path.Combine(wwwRootPath, @"images\room");
-                    using (var imageStream = new FileStream(Path.Combine(imagePath, imageName), FileMode.Create))
-                    {
-                        image.CopyTo(imageStream);
-                    }
+        //            string imageName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+        //            string imagePath = Path.Combine(wwwRootPath, @"images\room");
+        //            using (var imageStream = new FileStream(Path.Combine(imagePath, imageName), FileMode.Create))
+        //            {
+        //                image.CopyTo(imageStream);
+        //            }
 
-                    RoomImages roomImages = new RoomImages();
-                    roomImages.RoomId = oldRoom.Id;
-                    roomImages.image = wwwRootPath + @"\images\room\" + imageName;
-                    _context.RoomImages.Add(roomImages);
-                }
-            }
-            _context.Rooms.Update(oldRoom);
-            await _context.SaveChangesAsync();
-            return Ok(new
-            {
-                success = true,
-                data = oldRoom
-            });
-        }
-        [HttpDelete("DeleteRoom/{id}")]
-        public async Task<ActionResult> DeleteRoom(int id)
-        {
-            var oldRoom = await _context.Rooms.FindAsync(id);
+        //            RoomImages roomImages = new RoomImages();
+        //            roomImages.RoomId = oldRoom.Id;
+        //            roomImages.image = wwwRootPath + @"\images\room\" + imageName;
+        //            _context.RoomImages.Add(roomImages);
+        //        }
+        //    }
+        //    _context.Rooms.Update(oldRoom);
+        //    await _context.SaveChangesAsync();
+        //    return Ok(new
+        //    {
+        //        success = true,
+        //        data = oldRoom
+        //    });
+        //}
+        //[HttpDelete("DeleteRoom/{id}")]
+        //public async Task<ActionResult> DeleteRoom(int id)
+        //{
+        //    var oldRoom = await _context.Rooms.FindAsync(id);
 
-            if (oldRoom == null)
-            {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "there is no Room By this Id"
-                });
-            }
-            if(oldRoom.CreatorId != GetUserId())
-            {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "you are not the owner"
-                });
-            }
-            var roomImages = await _context.RoomImages.Where(x => x.RoomId == oldRoom.Id).ToListAsync();
-            if(roomImages.Count != 0)
-            {
-                foreach(var img in roomImages)
-                {
-                    _context.RoomImages.Remove(img);
-                }
-            }
-            _context.Rooms.Remove(oldRoom);
-            await _context.SaveChangesAsync();
-            return Ok(new
-            {
-                success = true,
-                message = "Deleted"
-            });
-        }
+        //    if (oldRoom == null)
+        //    {
+        //        return NotFound(new
+        //        {
+        //            success = false,
+        //            message = "there is no Room By this Id"
+        //        });
+        //    }
+        //    if(oldRoom.CreatorId != GetUserId())
+        //    {
+        //        return Unauthorized(new
+        //        {
+        //            success = false,
+        //            message = "you are not the owner"
+        //        });
+        //    }
+        //    var roomImages = await _context.RoomImages.Where(x => x.RoomId == oldRoom.Id).ToListAsync();
+        //    if(roomImages.Count != 0)
+        //    {
+        //        foreach(var img in roomImages)
+        //        {
+        //            _context.RoomImages.Remove(img);
+        //        }
+        //    }
+        //    _context.Rooms.Remove(oldRoom);
+        //    await _context.SaveChangesAsync();
+        //    return Ok(new
+        //    {
+        //        success = true,
+        //        message = "Deleted"
+        //    });
+        //}
     }
 }

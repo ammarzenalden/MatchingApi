@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Security.Claims;
 
@@ -106,7 +107,7 @@ namespace Matching.Controllers
             foreach (PropertyInfo property in userDto.GetType().GetProperties())
             {
                 object value = property.GetValue(userDto)!;
-                if (value == null)
+                if (value == null && property.Name.ToLower() != "password")
                 {
                     hasNull = true;
                     theNull = $"Property '{property.Name}' is null.";
@@ -125,7 +126,11 @@ namespace Matching.Controllers
             currentUser!.PhoneNumber = userDto.PhoneNumber;
             currentUser.Email = userDto.Email;
             currentUser.Name = userDto.Name;
-            currentUser.Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            if (!string.IsNullOrEmpty(userDto.Password))
+            {
+                currentUser.Password = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            }
+            
                     
             if (currentUser.ImageUrl is not null)
             {
