@@ -11,6 +11,7 @@ namespace Matching.Data
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            
             builder.Entity<PersonalPreferences>()
                 .HasOne(x => x.User)
                 .WithMany()
@@ -80,5 +81,6 @@ namespace Matching.Data
         public DbSet<Request> Requests { get; set; }
         public DbSet<RoomImages> RoomImages { get; set; }
         public DbSet<Blog> Blogs {  get; set; }
+        
     }
 }

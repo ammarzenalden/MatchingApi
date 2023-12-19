@@ -193,32 +193,32 @@ namespace Matching.Controllers
 
 
         }
-        [HttpPost("senemail")]
-        [AllowAnonymous]
-        public ActionResult sendEmail()
-        {
-            try
-            {
-                string body = @"
-<html>
-<body>
-<h1>Hi there,</h1> 
+//        [HttpPost("senemail")]
+//        [AllowAnonymous]
+//        public ActionResult sendEmail()
+//        {
+//            try
+//            {
+//                string body = @"
+//<html>
+//<body>
+//<h1>Hi there,</h1> 
 
-<p>Here is your password reset link: <a href='www.example.com'>Click Here</a></p>
+//<p>Here is your password reset link: <a href='www.example.com'>Click Here</a></p>
 
-<h5>Thanks 
-The Team
-</h5>
-</body>
-</html>";
-                Email email1 = new();
-                email1.SendResetEmail("ammar.zenalden1@gmail.com","fuck", body);
-                return Ok();
-            }
-            catch
-            {
-                return BadRequest();
-            }
-        }
+//<h5>Thanks 
+//The Team
+//</h5>
+//</body>
+//</html>";
+//                Email email1 = new();
+//                email1.SendResetEmail("ammar.zenalden1@gmail.com","fuck", body);
+//                return Ok();
+//            }
+//            catch
+//            {
+//                return BadRequest();
+//            }
+//        }
     }
 }

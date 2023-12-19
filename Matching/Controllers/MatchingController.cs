@@ -193,54 +193,54 @@ namespace Matching.Controllers
                 });
             }
         }
-        [HttpPost("ChosePartner/{id}")]
-        public async Task<ActionResult> ChosePartner(int id)
-        {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == GetUserId());
-            if(ticket == null)
-            {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "you do not have a ticket"
-                });
-            }
-            if(ticket.Type != "premium")
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "the type of your ticket must be premium ticket"
-                });
-            }
-            var user = await _context.Users.FindAsync(id);
-            if(user == null)
-            {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "there is no user by this id"
-                });
-            }
-            UserTicket userTicket = new()
-            {
-                ReceiverId = id,
-                SenderId = GetUserId(),
-                TicketId = ticket.Id,
-                TicketStatus = "Accepted",
-            };
-            _context.UserTickets.Add(userTicket);
-            await _context.SaveChangesAsync();
-            return Ok(new
-            {
-                success = true,
-                data = new
-                {
-                    userTicket = userTicket,
-                    ticket = ticket
-                }
-            });
-        }
+        //[HttpPost("ChosePartner/{id}")]
+        //public async Task<ActionResult> ChosePartner(int id)
+        //{
+        //    var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == GetUserId());
+        //    if(ticket == null)
+        //    {
+        //        return NotFound(new
+        //        {
+        //            success = false,
+        //            message = "you do not have a ticket"
+        //        });
+        //    }
+        //    if(ticket.Type != "premium")
+        //    {
+        //        return BadRequest(new
+        //        {
+        //            success = false,
+        //            message = "the type of your ticket must be premium ticket"
+        //        });
+        //    }
+        //    var user = await _context.Users.FindAsync(id);
+        //    if(user == null)
+        //    {
+        //        return NotFound(new
+        //        {
+        //            success = false,
+        //            message = "there is no user by this id"
+        //        });
+        //    }
+        //    UserTicket userTicket = new()
+        //    {
+        //        ReceiverId = id,
+        //        SenderId = GetUserId(),
+        //        TicketId = ticket.Id,
+        //        TicketStatus = "Accepted",
+        //    };
+        //    _context.UserTickets.Add(userTicket);
+        //    await _context.SaveChangesAsync();
+        //    return Ok(new
+        //    {
+        //        success = true,
+        //        data = new
+        //        {
+        //            userTicket = userTicket,
+        //            ticket = ticket
+        //        }
+        //    });
+        //}
         [HttpGet("RandomPartner")]
         public async Task<ActionResult> RandomPartner()
         {
