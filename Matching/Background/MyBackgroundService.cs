@@ -8,6 +8,7 @@ namespace Matching.Background
     public class MyBackgroundService : BackgroundService
     {
         private readonly ApplicationDbContext _context;
+        
         public MyBackgroundService(IServiceProvider services)
         {
             _context = services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -16,8 +17,10 @@ namespace Matching.Background
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                
                 try
                 {
+
                     var tickets = _context.Tickets.ToList();
 
                     foreach (var tick in tickets)
@@ -48,14 +51,15 @@ namespace Matching.Background
                             Console.WriteLine("Invalid date format.");
                         }
 
-                        await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                        
                     }
                 }
                 catch
                 {
 
                 }
-                }
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            }
         }
     }
 }

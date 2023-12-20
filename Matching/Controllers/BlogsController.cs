@@ -58,7 +58,8 @@ namespace Matching.Controllers
                 {
                     image.CopyTo(imageStream);
                 }
-                blog.Image = wwwRootPath + @"\images\blog\" + imageName;
+                //blog.Image = wwwRootPath + @"\images\blog\" + imageName;
+                blog.Image = $"{Request.Scheme}://{Request.Host}/images/blog/{imageName}";
             }
             _context.Blogs.Add(blog);
             await _context.SaveChangesAsync();

@@ -113,7 +113,8 @@ namespace Matching.Controllers
                     }
                 RoomImages roomImages = new RoomImages();
                 roomImages.RoomId = room.Id;
-                roomImages.image = wwwRootPath + @"\images\room\" + imageName;
+                //roomImages.image = wwwRootPath + @"\images\room\" + imageName;
+                roomImages.image = $"{Request.Scheme}://{Request.Host}/images/room/{imageName}";
                 _context.RoomImages.Add(roomImages);
                 imgs.Add(roomImages);
 

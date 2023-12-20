@@ -79,7 +79,12 @@ namespace Matching.Controllers
                     {
                         image.CopyTo(imageStream);
                     }
-                    user.ImageUrl = wwwRootPath + @"\images\user\" + imageName;
+                    //user.ImageUrl = wwwRootPath + @"\images\user\" + imageName;
+
+
+
+                    // Only save the file name
+                    user.ImageUrl = $"{Request.Scheme}://{Request.Host}/images/user/{imageName}";
                 }
 
                 _context.Users.Add(user);
@@ -149,7 +154,8 @@ namespace Matching.Controllers
                 {
                     image.CopyTo(imageStream);
                 }
-                currentUser.ImageUrl = wwwRootPath + @"\images\user\" + imageName;
+                currentUser.ImageUrl = $"{Request.Scheme}://{Request.Host}/images/user/{imageName}";
+                //currentUser.ImageUrl = wwwRootPath + @"\images\user\" + imageName;
             }
             _context.Users.Update(currentUser);
             await _context.SaveChangesAsync();

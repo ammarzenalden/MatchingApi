@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Matching.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231219232544_UpdateRoomModel")]
-    partial class UpdateRoomModel
+    [Migration("20231220215046_create")]
+    partial class create
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

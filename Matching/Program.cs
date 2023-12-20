@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -51,6 +52,7 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddHostedService<MyBackgroundService>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,7 +62,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors();
-
+string wwwRootPath = app.Environment.WebRootPath;
+string imageFolder = "images";
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -68,7 +71,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseStaticFiles();
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(wwwRootPath, imageFolder)),
+    RequestPath = "/images",
+});
 app.Seed();
 
 app.Run();
