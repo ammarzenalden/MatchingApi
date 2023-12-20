@@ -108,6 +108,12 @@ namespace Matching.Controllers
                     message = "you dont have ticket"
                 });
             }
+            var userTickets = await _context.UserTickets.Where(x => x.TicketId == oldTicket.Id).ToListAsync();
+            if(userTickets.Count > 0)
+            {
+            _context.UserTickets.RemoveRange(userTickets);
+            }
+            
             _context.Tickets.Remove(oldTicket);
             await _context.SaveChangesAsync();
             return Ok(new
