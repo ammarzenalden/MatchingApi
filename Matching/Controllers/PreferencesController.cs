@@ -23,6 +23,26 @@ namespace Matching.Controllers
 
             return int.Parse(userId!);
         }
+        [HttpGet("GetPersonalPreferences")]
+        public async Task<ActionResult> GetPersonalPreferences()
+        {
+            var pp = await _context.PersonalPreferences.FirstOrDefaultAsync(x=> x.UserId == GetUserId());
+            return Ok(new
+            {
+                success = true,
+                data = pp
+            });
+        }
+        [HttpGet("GetPotentialPartnerPreferences")]
+        public async Task<ActionResult> GetPotentialPartnerPreferences()
+        {
+            var pp = await _context.PotentialPartnerPreferences.FirstOrDefaultAsync(x => x.UserId == GetUserId());
+            return Ok(new
+            {
+                success = true,
+                data = pp
+            });
+        }
         [HttpPost("AddPersonalPreferences")]
         public async Task<ActionResult> AddPersonalPreferences(PersonalPreferencesDto personalPreferencesDto)
         {

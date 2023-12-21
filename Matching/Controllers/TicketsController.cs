@@ -23,6 +23,16 @@ namespace Matching.Controllers
 
             return int.Parse(userId!);
         }
+        [HttpGet("GetTicket")]
+        public async Task<ActionResult> GetTicket()
+        {
+            var pp = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == GetUserId());
+            return Ok(new
+            {
+                success = true,
+                data = pp
+            });
+        }
         [HttpPost("CreateTicket")]
         public async Task<ActionResult> CreateTicket(TicketDto ticketDto)
         {

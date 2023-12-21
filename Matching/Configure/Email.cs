@@ -5,7 +5,7 @@ namespace Matching.Configure
 {
     public class Email
     {
-        public void SendResetEmail(string toEmail,string subject, string body)
+        public void SendEmail(string toEmail,string subject, string body)
         {
             using (var smtpClient = new SmtpClient("smtp-mail.outlook.com"))
             {

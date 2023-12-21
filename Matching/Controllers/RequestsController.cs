@@ -51,7 +51,13 @@ namespace Matching.Controllers
             Email email = new();
             try
             {
-                email.SendResetEmail(receiver.Email!, "Req", "you have new Request");
+                //change the body to html when the user has received new friend request 
+                //for example : body = @"<html><body>....</body></html>";
+                string body = @"";
+                //change the subject to suitable one 
+                //for example : subject = "new request";
+                string subject = "";
+                email.SendEmail(receiver.Email!, subject, body);
             }
             catch
             {
@@ -120,7 +126,13 @@ namespace Matching.Controllers
                 }
                 try
                 {
-                    email.SendResetEmail(sender!.Email!, "Req", "Accept you");
+                    //change the body to html if the user Accept the request 
+                    //for example : body = @"<html><body>....</body></html>";
+                    string body = @"";
+                    //change the subject to suitable one 
+                    //for example : subject = "Accepted";
+                    string subject = "";
+                    email.SendEmail(sender!.Email!, subject, body);
                 }
                 catch
                 {
@@ -132,7 +144,13 @@ namespace Matching.Controllers
                 ticket!.TicketStatus = "Rejected";
                 try
                 {
-                    email.SendResetEmail(sender!.Email!, "Req", "Rejected you");
+                    //change the body to html if the user reject the request 
+                    //for example : body = @"<html><body>....</body></html>";
+                    string body = @"";
+                    //change the subject to suitable one 
+                    //for example : subject = "Rejected";
+                    string subject = "";
+                    email.SendEmail(sender!.Email!, subject, body);
                 }
                 catch
                 {
