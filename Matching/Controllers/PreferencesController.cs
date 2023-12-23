@@ -229,6 +229,8 @@ namespace Matching.Controllers
             oldOne.CommitmentLevel = potentialPartnerPreferencesDto.CommitmentLevel;
             oldOne.FavoriteHolidayDestination = potentialPartnerPreferencesDto.FavoriteHolidayDestination;
             oldOne.FreeTime = potentialPartnerPreferencesDto.FreeTime;
+            oldOne.MinAge = potentialPartnerPreferencesDto.MinAge;
+            oldOne.MaxAge = potentialPartnerPreferencesDto.MaxAge;
             _context.PotentialPartnerPreferences.Update(oldOne);
             await _context.SaveChangesAsync();
             return Ok(new
