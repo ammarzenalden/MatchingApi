@@ -39,7 +39,7 @@ namespace Matching.Controllers
                     message = "you do not have a ticket"
                 });
             }
-            if(ticket.Type != "smart")
+            if(ticket.Type!.ToLower() != "smart")
             {
                 return BadRequest(new
                 {
@@ -253,7 +253,7 @@ namespace Matching.Controllers
                     message = "you do not have a ticket"
                 });
             }
-            if (ticket.Type != "Regular")
+            if (ticket.Type!.ToLower() != "regular")
             {
                 return BadRequest(new
                 {
@@ -263,13 +263,13 @@ namespace Matching.Controllers
             }
             var similrTicekt = await _context.Tickets
                 .OrderBy(x => Guid.NewGuid())
-                .FirstOrDefaultAsync(x => x.BookingDate == ticket.BookingDate && x.RoomId == ticket.RoomId && x.CreatorId != GetUserId());
+                .FirstOrDefaultAsync(x => x.CreatorId != GetUserId()&& x.Type!.ToLower() == ticket.Type.ToLower());
             if (similrTicekt == null)
             {
                 return Ok(new
                 {
                     success = true,
-                    message = "no have the same booking date and room"
+                    message = "no have the same Type of ticket"
                 });
             }
             var similrUser = await _context.Users.FindAsync(similrTicekt.CreatorId);

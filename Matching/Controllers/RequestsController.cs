@@ -119,10 +119,8 @@ namespace Matching.Controllers
                 var allrequets = await _context.UserTickets.Where(x => x.SenderId == request.SenderId && x.ReceiverId != GetUserId()).ToListAsync();
                 if(allrequets.Count != 0)
                 {
-                    foreach (var req in allrequets)
-                    {
-                        _context.UserTickets.Remove(req);
-                    }
+                    _context.UserTickets.RemoveRange(allrequets);
+                    
                 }
                 try
                 {
