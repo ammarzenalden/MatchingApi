@@ -45,7 +45,8 @@ namespace Matching.Controllers
             _context.Requests.Add(request);
             var userTicket = await _context.UserTickets
                 .FirstOrDefaultAsync(x => x.ReceiverId == id && x.SenderId == GetUserId());
-            userTicket!.TicketStatus = "wating";
+            
+            userTicket!.TicketStatus = "waiting";
             _context.UserTickets.Update(userTicket);
             await _context.SaveChangesAsync();
             Email email = new();
@@ -58,6 +59,7 @@ namespace Matching.Controllers
                 //for example : subject = "new request";
                 string subject = "";
                 email.SendEmail(receiver.Email!, subject, body);
+                
             }
             catch
             {
@@ -83,10 +85,21 @@ namespace Matching.Controllers
         public async Task<ActionResult> GetReceivedRequests()
         {
             var sendedRequests = await _context.Requests.Where(x => x.ReceiverId == GetUserId()).ToListAsync();
+            List<Tuple<Request, string>> aa = new();
+            if (sendedRequests.Count > 0)
+            {
+                foreach(var ss in sendedRequests)
+                {
+                    var user = await _context.Users.FindAsync(ss.SenderId);
+                    aa.Add(new Tuple<Request, string>(ss,user!.Name!));
+                }
+                
+            }
+            
             return Ok(new
             {
                 success = true,
-                data = sendedRequests
+                data = aa
             });
         }
         [HttpPut("AnswerTheRequest")]

@@ -37,7 +37,14 @@ namespace Matching.Background
                                 {
                                     foreach (var usti in userTicket)
                                     {
-                                        usti.TicketStatus = "done";
+                                        if(usti.TicketStatus == "Accepted")
+                                        {
+                                            usti.TicketStatus = "done";
+                                        }
+                                        else
+                                        {
+                                            usti.TicketStatus = "cancelled";
+                                        }
 
                                     }
                                     _context.UpdateRange(userTicket);
