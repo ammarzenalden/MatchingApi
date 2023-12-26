@@ -23,14 +23,44 @@ namespace Matching.Controllers
 
             return int.Parse(userId!);
         }
-        [HttpGet("GetTicket")]
-        public async Task<ActionResult> GetTicket()
+        [HttpGet("GetAllTicket")]
+        public async Task<ActionResult> GetAllTicket()
         {
-            var pp = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == GetUserId());
+            var pp = await _context.Tickets.Where(x => x.CreatorId == GetUserId()).ToListAsync();
             return Ok(new
             {
                 success = true,
                 data = pp
+            });
+        }
+        [HttpGet("GetLastTicket")]
+        public async Task<ActionResult> GetLastTicket()
+        {
+            var pp = await _context.Tickets.Where(x => x.CreatorId == GetUserId()).OrderBy(x=>x.Id).ToListAsync();
+            List<Ticket> ff = new();
+            if (pp.Count > 0)
+            {
+                foreach (var item in pp)
+                {
+                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && (x.TicketStatus == "done"|| x.TicketStatus == "cancelled"));
+                    if (oldUserTicket == null)
+                    {
+                        return Ok(new
+                        {
+                            success = true,
+                            message =item
+                        });
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            return Ok(new
+            {
+                success = true,
+                data = pp.Last()
             });
         }
         [HttpPost("CreateTicket")]
@@ -41,7 +71,7 @@ namespace Matching.Controllers
             if(oldTicket.Count>0) {
                 foreach (var item in oldTicket)
                 {
-                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && x.TicketStatus == "done");
+                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && (x.TicketStatus == "done" || x.TicketStatus == "cancelled"));
                     if (oldUserTicket == null)
                     {
                         return Conflict(new
@@ -59,7 +89,7 @@ namespace Matching.Controllers
             {
                 foreach (var item in RoomDate)
                 {
-                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && x.TicketStatus == "done");
+                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && (x.TicketStatus == "done" || x.TicketStatus == "cancelled"));
                     if (oldUserTicket == null)
                     {
                         return Conflict(new
