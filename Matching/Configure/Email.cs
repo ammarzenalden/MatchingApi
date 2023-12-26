@@ -7,16 +7,24 @@ namespace Matching.Configure
     {
         public async void SendEmail(string toEmail,string subject, string body)
         {
-            using (var smtpClient = new SmtpClient("smtp-mail.outlook.com"))
+            try
             {
-                smtpClient.Port = 587;
-                smtpClient.Credentials = new NetworkCredential("lovelockdownwebsite@hotmail.com", "jpeaojjzcperyhpy");
-                smtpClient.EnableSsl = true;
-                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-                smtpClient.UseDefaultCredentials = false;
-                var message = new MailMessage("lovelockdownwebsite@hotmail.com", toEmail, subject, body);
-                message.IsBodyHtml = true;
-                await smtpClient.SendMailAsync(message);
+
+                using (var smtpClient = new SmtpClient("smtp-mail.outlook.com"))
+                {
+                    smtpClient.Port = 587;
+                    smtpClient.Credentials = new NetworkCredential("lovelockdownwebsite@hotmail.com", "jpeaojjzcperyhpy");
+                    smtpClient.EnableSsl = true;
+                    smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    smtpClient.UseDefaultCredentials = false;
+                    var message = new MailMessage("lovelockdownwebsite@hotmail.com", toEmail, subject, body);
+                    message.IsBodyHtml = true;
+                    await smtpClient.SendMailAsync(message);
+                }
+            }
+            catch
+            {
+
             }
         }
     }

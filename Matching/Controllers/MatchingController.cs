@@ -102,13 +102,14 @@ namespace Matching.Controllers
                 currentPersonalPref.Pet!,
                 currentPersonalPref.CommitmentLevel!,
                 currentPersonalPref.FavoriteHolidayDestination!,
-                //currentPersonalPref.BodyType!
+                
 
             };
             theUserPersonal = theUserPersonal.Concat(currentPersonalPref.MusicGenres!).ToArray();
             theUserPersonal = theUserPersonal.Concat(currentPersonalPref.PersonalBelieves!).ToArray();
             theUserPersonal = theUserPersonal.Concat(currentPersonalPref.FreeTime!).ToArray();
-
+            Array.Resize(ref theUserPersonal, theUserPersonal.Length + 1);
+            theUserPersonal[theUserPersonal.Length - 1] = currentPersonalPref.BodyType!;
 
             string[] theUserPotential =
             {
@@ -119,7 +120,12 @@ namespace Matching.Controllers
             theUserPotential = theUserPotential.Concat(currentPotentialPartnerPref.MusicGenres!).ToArray();
             theUserPotential = theUserPotential.Concat(currentPotentialPartnerPref.PersonalBelieves!).ToArray();
             theUserPotential = theUserPotential.Concat(currentPotentialPartnerPref.FreeTime!).ToArray();
-            //theUserPotential = theUserPotential.Concat(currentPotentialPartnerPref.BodyType!).ToArray();
+            theUserPotential = theUserPotential.Concat(currentPotentialPartnerPref.FreeTime!).ToArray();
+            if (currentPotentialPartnerPref.BodyType! != "any_preference")
+            {
+                Array.Resize(ref theUserPotential, theUserPotential.Length + 1);
+                theUserPotential[theUserPotential.Length - 1] = currentPotentialPartnerPref.BodyType!;
+            }
             
             TheMatching matching = new();
             var lastResult = new List<MatchingResultDto>();
@@ -153,9 +159,15 @@ namespace Matching.Controllers
                                 //allpers.BodyType
 
                             };
+                            if (currentPotentialPartnerPref.BodyType! != "any_preference")
+                            {
+                                Array.Resize(ref pers, pers.Length + 1);
+                                pers[pers.Length - 1] = allpers.BodyType!;
+                            }
                             pers = pers.Concat(allpers.MusicGenres!).ToArray();
                             pers = pers.Concat(allpers.PersonalBelieves!).ToArray();
                             pers = pers.Concat(allpers.FreeTime!).ToArray();
+
                             string[]possiblePers =pers;
                             string[] spers =
                             {
@@ -168,6 +180,16 @@ namespace Matching.Controllers
                             spers = spers.Concat(subpers.MusicGenres!).ToArray();
                             spers = spers.Concat(subpers.PersonalBelieves!).ToArray();
                             spers = spers.Concat(subpers.FreeTime!).ToArray();
+                            if (subpers.BodyType! != "any_preference")
+                            {
+                                Array.Resize(ref spers, spers.Length + 1);
+                                spers[spers.Length - 1] = subpers.BodyType!;
+
+                            }
+                            else
+                            {
+                                theUserPersonal = theUserPersonal.Where(w => w != theUserPersonal[theUserPersonal.Length - 1]).ToArray();
+                            }
                             //spers = spers.Concat(subpers.BodyType!).ToArray();
                             string[] possiblePot = spers;
                             double first = matching.CalculateSimilarity(theUserPersonal, possiblePot);
@@ -357,8 +379,8 @@ namespace Matching.Controllers
                         continue;
                     }
                     var similrTicekt = await _context.Tickets
-               .OrderBy(x => Guid.NewGuid())
-               .FirstOrDefaultAsync(x => x.CreatorId != GetUserId() && x.Type!.ToLower() == ticket.Type.ToLower());
+                    .OrderBy(x => Guid.NewGuid())
+                    .FirstOrDefaultAsync(x => x.CreatorId != GetUserId() && x.Type!.ToLower() == ticket.Type.ToLower());
                     if (similrTicekt == null)
                     {
                         return Ok(new
@@ -369,7 +391,6 @@ namespace Matching.Controllers
                     }
                     var similrUser = await _context.Users.FindAsync(similrTicekt.CreatorId);
                     int count = 0;
-
                     if (oldUserTicket.Count > 0)
                     {
                         foreach (var ust in oldUserTicket)
@@ -379,18 +400,18 @@ namespace Matching.Controllers
                                 count += 1;
                             }
                         }
-                        if (count == 0)
+                        
+                    }
+                    if (count == 0)
+                    {
+                        UserTicket userTicket = new()
                         {
-                            UserTicket userTicket = new()
-                            {
-                                SenderId = GetUserId(),
-                                ReceiverId = similrUser!.Id,
-                                TicketId = ticket.Id,
-                                TicketStatus = "pending"
-                            };
-                            _context.UserTickets.Add(userTicket);
-                        }
-
+                            SenderId = GetUserId(),
+                            ReceiverId = similrUser!.Id,
+                            TicketId = ticket.Id,
+                            TicketStatus = "pending"
+                        };
+                        _context.UserTickets.Add(userTicket);
                     }
                     _context.SaveChanges();
                     UserResultDto theUser = new()
@@ -408,15 +429,12 @@ namespace Matching.Controllers
                     });
                 }
             }
-            //
             List<string> a = new();
             return Ok(new
             {
                 success = true,
                 data = a
             });
-            
-            
         }
     }
 }

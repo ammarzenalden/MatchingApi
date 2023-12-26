@@ -85,13 +85,22 @@ namespace Matching.Controllers
         public async Task<ActionResult> GetReceivedRequests()
         {
             var sendedRequests = await _context.Requests.Where(x => x.ReceiverId == GetUserId()).ToListAsync();
-            List<Tuple<Request, string>> aa = new();
+            
+            List<Tuple<Request, UserResultDto>> aa = new();
             if (sendedRequests.Count > 0)
             {
                 foreach(var ss in sendedRequests)
                 {
                     var user = await _context.Users.FindAsync(ss.SenderId);
-                    aa.Add(new Tuple<Request, string>(ss,user!.Name!));
+                    UserResultDto userResultDto = new()
+                    {
+                        Email = user!.Email,
+                        Id = user.Id,
+                        ImageUrl = user.ImageUrl,
+                        Name = user.Name,
+                        PhoneNumber = user.PhoneNumber
+                    };
+                    aa.Add(new Tuple<Request, UserResultDto>(ss,userResultDto));
                 }
                 
             }

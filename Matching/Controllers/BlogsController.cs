@@ -29,17 +29,10 @@ namespace Matching.Controllers
             return int.Parse(userId!);
         }
         [HttpPost("CreateBlog")]
+        [AllowAnonymous]
         public async Task<ActionResult> CreateBlog([FromForm] BlogDto blogDto, IFormFile? image)
         {
-            var user = await _context.Users.FindAsync(GetUserId());
-            if (user!.Role != "admin")
-            {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "you are not admin"
-                });
-            }
+            
             Blog blog = new()
             {
                 Description = blogDto.Description,

@@ -36,13 +36,22 @@ namespace Matching.Controllers
         [HttpPost("CreateTicket")]
         public async Task<ActionResult> CreateTicket(TicketDto ticketDto)
         {
-            var oldTicket = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == GetUserId()); 
-            if(oldTicket != null) {
-                return Conflict(new
+            var oldTicket = await _context.Tickets.Where(x => x.CreatorId == GetUserId()).ToListAsync();
+            
+            if(oldTicket.Count>0) {
+                foreach (var item in oldTicket)
                 {
-                    success = false,
-                    message = "you already have Ticket"
-                });
+                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && x.TicketStatus == "done");
+                    if (oldUserTicket == null)
+                    {
+                        return Conflict(new
+                        {
+                            success = false,
+                            message = "you already have Ticket"
+                        }); 
+                    }
+                    
+                }
             }
             var RoomDate = await _context.Tickets
                 .Where(x => x.RoomId == ticketDto.RoomId && x.BookingDate == ticketDto.BookingDate).ToListAsync();
