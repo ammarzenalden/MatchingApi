@@ -55,15 +55,32 @@ namespace Matching.Controllers
             }
             var RoomDate = await _context.Tickets
                 .Where(x => x.RoomId == ticketDto.RoomId && x.BookingDate == ticketDto.BookingDate).ToListAsync();
-            if(RoomDate.Count != 0)
+            if (RoomDate.Count > 0)
             {
-                return Conflict(new
+                foreach (var item in RoomDate)
                 {
-                    success = false,
-                    message = "the Room is booked on this date chose another date",
-                    ticket = RoomDate
-                });
+                    var oldUserTicket = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && x.TicketStatus == "done");
+                    if (oldUserTicket == null)
+                    {
+                        return Conflict(new
+                        {
+                            success = false,
+                            message = "the Room is booked on this date chose another date",
+                            ticket = RoomDate
+                        });
+                    }
+
+                }
             }
+            //if (RoomDate.Count != 0)
+            //{
+            //    return Conflict(new
+            //    {
+            //        success = false,
+            //        message = "the Room is booked on this date chose another date",
+            //        ticket = RoomDate
+            //    });
+            //}
             
             Ticket ticket = new()
             {
