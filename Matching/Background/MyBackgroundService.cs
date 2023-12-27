@@ -1,4 +1,5 @@
 ﻿using Matching.Data;
+using Matching.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -47,10 +48,19 @@ namespace Matching.Background
                                         }
 
                                     }
+                                    
                                     _context.UpdateRange(userTicket);
-                                    _context.SaveChanges();
+                                    
                                 }
-
+                                UserTicket userTicket1 = new()
+                                {
+                                    SenderId = tick.CreatorId,
+                                    ReceiverId = null,
+                                    TicketId = tick.Id,
+                                    TicketStatus = "cancelled"
+                                };
+                                _context.UserTickets.Add(userTicket1);
+                                _context.SaveChanges();
                             }
                         }
                         else

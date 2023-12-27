@@ -48,7 +48,7 @@ namespace Matching.Controllers
                         return Ok(new
                         {
                             success = true,
-                            message =item
+                            data =item
                         });
                     }
                     else
@@ -56,12 +56,18 @@ namespace Matching.Controllers
                         continue;
                     }
                 }
+                return Ok(new
+                {
+                    success = true,
+                    data = pp.Last()
+                });
             }
             return Ok(new
             {
                 success = true,
-                data = pp.Last()
+                data = pp
             });
+            
         }
         [HttpPost("CreateTicket")]
         public async Task<ActionResult> CreateTicket(TicketDto ticketDto)

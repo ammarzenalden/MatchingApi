@@ -30,7 +30,7 @@ namespace Matching.Controllers
         public async Task<ActionResult> GetMatchingUsers()
         {
             int userId = GetUserId();
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == userId);
+            var ticket = await _context.Tickets.Where(x => x.CreatorId == userId).ToListAsync();
             if(ticket == null)
             {
                 return NotFound(new
@@ -39,13 +39,33 @@ namespace Matching.Controllers
                     message = "you do not have a ticket"
                 });
             }
-            if(ticket.Type!.ToLower() != "smart")
+            Ticket ticket1 = new();
+            int ucount = 0;
+            foreach (var item in ticket)
             {
-                return BadRequest(new
+                var oldUserTickets = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && (x.TicketStatus == "done" || x.TicketStatus == "cancelled"));
+                if (oldUserTickets == null)
+                {
+                    ucount += 1;
+                    ticket1 = item;
+                    if (item.Type!.ToLower() != "smart")
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            message = "the type of your ticket must be smart ticket"
+                        });
+                    }
+                }
+            }
+            if (ucount == 0)
+            {
+                return NotFound(new
                 {
                     success = false,
-                    message = "the type of your ticket must be smart ticket"
+                    message = "you do not have a ticket"
                 });
+
             }
             var currentUser = await _context.Users.FindAsync(userId);
             var oldUserTicket = await _context.UserTickets.Where(x => x.SenderId == GetUserId()).ToListAsync();
@@ -56,6 +76,9 @@ namespace Matching.Controllers
                     if(ust.TicketStatus!.ToLower() == "accepted")
                     {
                         var matchingPerson = await _context.Users.FindAsync(ust.ReceiverId);
+                        var userPref  =await _context.PersonalPreferences.FirstOrDefaultAsync(x=>x.UserId==ust.ReceiverId);
+                        var userPote = await _context.PotentialPartnerPreferences.FirstOrDefaultAsync(x => x.UserId == ust.ReceiverId);
+
                         UserResultDto resultDto = new()
                         {
                             Email = matchingPerson!.Email,
@@ -63,12 +86,19 @@ namespace Matching.Controllers
                             ImageUrl = matchingPerson.ImageUrl,
                             Name = matchingPerson.Name,
                             PhoneNumber = matchingPerson.PhoneNumber
-                        }; 
+                        };
+                        MatchingResultDto matchingResultDto = new()
+                        {
+                            PersonalPreferences = userPref,
+                            PotentialPartnerPreferences = userPote,
+                            User = resultDto,
+                            SimilarityScore = 0
+                        };
                         return Ok(new
                         {
                             success = true,
                             message = "you have already find a matching person",
-                            data = resultDto
+                            data = matchingResultDto
                         });
                     }
                 }
@@ -244,7 +274,7 @@ namespace Matching.Controllers
                         {
                             SenderId = GetUserId(),
                             ReceiverId = ss.User!.Id,
-                            TicketId = ticket.Id,
+                            TicketId = ticket1.Id,
                             TicketStatus = "pending"
                         };
                         _context.UserTickets.Add(userTicket);
@@ -325,8 +355,8 @@ namespace Matching.Controllers
         [HttpGet("RandomPartner")]
         public async Task<ActionResult> RandomPartner()
         {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.CreatorId == GetUserId());
-            if (ticket == null)
+            var ticket = await _context.Tickets.Where(x => x.CreatorId == GetUserId()).ToListAsync();
+            if (ticket.Count == 0)
             {
                 return NotFound(new
                 {
@@ -334,100 +364,117 @@ namespace Matching.Controllers
                     message = "you do not have a ticket"
                 });
             }
-            if (ticket.Type!.ToLower() != "regular")
+            
+            int ucount = 0;
+            foreach (var item in ticket)
             {
-                return BadRequest(new
+                var oldUserTickets = await _context.UserTickets.FirstOrDefaultAsync(x => x.TicketId == item.Id && (x.TicketStatus == "done" || x.TicketStatus == "cancelled"));
+                if (oldUserTickets == null)
                 {
-                    success = false,
-                    message = "the type of your ticket must be Regular ticket"
-                });
-            }
-            var oldUserTicket = await _context.UserTickets.Where(x => x.SenderId == GetUserId()).ToListAsync();
-            if (oldUserTicket.Count > 0)
-            {
-                foreach (var ust in oldUserTicket)
-                {
-                    if (ust.TicketStatus!.ToLower() == "accepted")
+                    ucount += 1;
+                    if (item.Type!.ToLower() != "regular")
                     {
-                        var matchingPerson = await _context.Users.FindAsync(ust.ReceiverId);
-                        UserResultDto resultDto = new()
+                        return BadRequest(new
                         {
-                            Email = matchingPerson!.Email,
-                            Id = matchingPerson.Id,
-                            ImageUrl = matchingPerson.ImageUrl,
-                            Name = matchingPerson.Name,
-                            PhoneNumber = matchingPerson.PhoneNumber
-                        };
-                        return Ok(new
-                        {
-                            success = true,
-                            message = "you have already find a matching person",
-                            data = resultDto
+                            success = false,
+                            message = "the type of your ticket must be Regular ticket"
                         });
                     }
-                }
-            }
-            var users = await _context.Users.Where(x => x.Id != GetUserId()).ToListAsync();
-            if(users.Count > 0)
-            {
-                foreach(var uss in users)
-                {
-                    var usTicket = await _context.UserTickets.Where(x => x.SenderId == GetUserId()
-                         && x.ReceiverId == uss!.Id && x.TicketStatus == "Rejected").ToListAsync();
-                    if (usTicket.Count > 0)
-                    {
-                        continue;
-                    }
-                    var similrTicekt = await _context.Tickets
-                    .OrderBy(x => Guid.NewGuid())
-                    .FirstOrDefaultAsync(x => x.CreatorId != GetUserId() && x.Type!.ToLower() == ticket.Type.ToLower());
-                    if (similrTicekt == null)
-                    {
-                        return Ok(new
-                        {
-                            success = true,
-                            message = "no have the same Type of ticket"
-                        });
-                    }
-                    var similrUser = await _context.Users.FindAsync(similrTicekt.CreatorId);
-                    int count = 0;
+                    var oldUserTicket = await _context.UserTickets.Where(x => x.SenderId == GetUserId()).ToListAsync();
                     if (oldUserTicket.Count > 0)
                     {
                         foreach (var ust in oldUserTicket)
                         {
-                            if (ust.ReceiverId == similrUser!.Id)
+                            if (ust.TicketStatus!.ToLower() == "accepted")
                             {
-                                count += 1;
+                                var matchingPerson = await _context.Users.FindAsync(ust.ReceiverId);
+                                UserResultDto resultDto = new()
+                                {
+                                    Email = matchingPerson!.Email,
+                                    Id = matchingPerson.Id,
+                                    ImageUrl = matchingPerson.ImageUrl,
+                                    Name = matchingPerson.Name,
+                                    PhoneNumber = matchingPerson.PhoneNumber
+                                };
+                                return Ok(new
+                                {
+                                    success = true,
+                                    message = "you have already find a matching person",
+                                    data = resultDto
+                                });
                             }
                         }
+                    }
+                    var users = await _context.Users.Where(x => x.Id != GetUserId()).ToListAsync();
+                    if (users.Count > 0)
+                    {
                         
+                        
+                            
+                            var similrTicekt = await _context.Tickets
+                            .OrderBy(x => Guid.NewGuid())
+                            .FirstOrDefaultAsync(x => x.CreatorId != GetUserId() && x.Type!.ToLower() == item.Type!.ToLower());
+                            if (similrTicekt == null)
+                            {
+                                return Ok(new
+                                {
+                                    success = true,
+                                    message = "no one have the same Type of ticket"
+                                });
+                            }
+                            var ssTicekt = await _context.UserTickets.FirstOrDefaultAsync(x => x.SenderId == GetUserId()
+                                 && x.ReceiverId == similrTicekt.CreatorId && x.TicketStatus!.ToLower() == "Rejected".ToLower());
+                            if (ssTicekt == null)
+                            {
+                                var similrUser = await _context.Users.FindAsync(similrTicekt.CreatorId);
+                                int count = 0;
+                                if (oldUserTicket.Count > 0)
+                                {
+                                    foreach (var ust in oldUserTicket)
+                                    {
+                                        if (ust.ReceiverId == similrUser!.Id )
+                                        {
+                                            count += 1;
+                                        }
+                                    }
+
+                                }
+                                if (count == 0)
+                                {
+                                    UserTicket userTicket = new()
+                                    {
+                                        SenderId = GetUserId(),
+                                        ReceiverId = similrUser!.Id,
+                                        TicketId = item.Id,
+                                        TicketStatus = "pending"
+                                    };
+                                    _context.UserTickets.Add(userTicket);
+                                }
+                                _context.SaveChanges();
+                                UserResultDto theUser = new()
+                                {
+                                    Id = similrUser!.Id,
+                                    Email = similrUser!.Email,
+                                    ImageUrl = similrUser.ImageUrl,
+                                    Name = similrUser.Name,
+                                    PhoneNumber = similrUser.PhoneNumber
+                                };
+                                return Ok(new
+                                {
+                                    success = true,
+                                    data = theUser
+                                });
+                            }
                     }
-                    if (count == 0)
-                    {
-                        UserTicket userTicket = new()
-                        {
-                            SenderId = GetUserId(),
-                            ReceiverId = similrUser!.Id,
-                            TicketId = ticket.Id,
-                            TicketStatus = "pending"
-                        };
-                        _context.UserTickets.Add(userTicket);
-                    }
-                    _context.SaveChanges();
-                    UserResultDto theUser = new()
-                    {
-                        Id = similrUser!.Id,
-                        Email = similrUser!.Email,
-                        ImageUrl = similrUser.ImageUrl,
-                        Name = similrUser.Name,
-                        PhoneNumber = similrUser.PhoneNumber
-                    };
-                    return Ok(new
-                    {
-                        success = true,
-                        data = theUser
-                    });
                 }
+            }
+            if(ucount == 0)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "you do not have a ticket"
+                });
             }
             List<string> a = new();
             return Ok(new
