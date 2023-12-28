@@ -50,16 +50,19 @@ namespace Matching.Background
                                     }
                                     
                                     _context.UpdateRange(userTicket);
-                                    
+
                                 }
-                                UserTicket userTicket1 = new()
+                                else
                                 {
-                                    SenderId = tick.CreatorId,
-                                    ReceiverId = null,
-                                    TicketId = tick.Id,
-                                    TicketStatus = "cancelled"
-                                };
-                                _context.UserTickets.Add(userTicket1);
+                                    UserTicket userTicket1 = new()
+                                    {
+                                        SenderId = tick.CreatorId,
+                                        ReceiverId = null,
+                                        TicketId = tick.Id,
+                                        TicketStatus = "cancelled"
+                                    };
+                                    _context.UserTickets.Add(userTicket1);
+                                }
                                 _context.SaveChanges();
                             }
                         }
