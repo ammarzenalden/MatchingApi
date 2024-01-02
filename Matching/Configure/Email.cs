@@ -10,14 +10,14 @@ namespace Matching.Configure
             try
             {
 
-                using (var smtpClient = new SmtpClient("smtp-mail.outlook.com"))
+                using (var smtpClient = new SmtpClient("smtp.gmail.com"))
                 {
                     smtpClient.Port = 587;
-                    smtpClient.Credentials = new NetworkCredential("lovelockdownwebsite@hotmail.com", "jpeaojjzcperyhpy");
+                    smtpClient.Credentials = new NetworkCredential("lovelockdowndating@gmail.com", "peau opau qnvy xcbj");
                     smtpClient.EnableSsl = true;
                     smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
                     smtpClient.UseDefaultCredentials = false;
-                    var message = new MailMessage("lovelockdownwebsite@hotmail.com", toEmail, subject, body);
+                    var message = new MailMessage("lovelockdowndating@gmail.com", toEmail, subject, body);
                     message.IsBodyHtml = true;
                     await smtpClient.SendMailAsync(message);
                 }

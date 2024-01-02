@@ -11,13 +11,23 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddPolicy("AllowAll",
+             builder =>
+             {
+                 builder
+                 .AllowAnyOrigin()
+                 .AllowAnyMethod()
+                 .AllowAnyHeader();
+                 //.AllowCredentials();
+             });
+    /*options.AddDefaultPolicy(builder =>
     {
+        
         builder.WithOrigins("http://localhost:4500")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
-    });
+    });*/
 });
 // Add services to the container.
 builder.Services.AddControllers(options =>
@@ -61,7 +71,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors();
+app.UseCors("AllowAll");
 string wwwRootPath = app.Environment.WebRootPath;
 string imageFolder = "images";
 app.UseHttpsRedirection();
