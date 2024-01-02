@@ -11,19 +11,25 @@ namespace Matching.Controllers
     {
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult SendEmail(string email,string subj,string body)
+        public ActionResult SendEmail(EmailRequestModel emailRequestModel)
         {
             try
             {
-                string bb = $@"{body}";
+                string bb = $@"{emailRequestModel.Body}";
                 Email email1 = new();
-                email1.SendEmail(email,subj, bb);
+                email1.SendEmail(emailRequestModel.Email,emailRequestModel.Subject, bb);
                 return Ok();
             }
             catch
             {
                 return BadRequest();
             }
+        }
+        public class EmailRequestModel
+        {
+            public string? Email { get; set; }
+            public string? Subject { get; set; }
+            public string? Body { get; set; }
         }
     }
 }
